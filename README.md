@@ -1,24 +1,20 @@
 # Camera Kit
-
 A tool kit to work and interface to serial cameras
-
 
 
 ## Installation for users
 
 1) Clone the repository 
 ```shell
-  git clone git@git.ni.dfki.de:gjohn/ssl_dataset.git
+git clone git@git.ni.dfki.de:gjohn/ssl_dataset.git
 ```
-
 2) Navigate to the repository directory
 ```shell
-  cd ssl_dataset
+cd ssl_dataset
  ```
-
 3) Initialize [poetry](https://python-poetry.org/)
 ```shell
-  poetry install
+poetry install
 ```
 
 
