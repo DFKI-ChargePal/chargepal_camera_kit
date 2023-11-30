@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "chargepal-camera-kit"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "A tool kit for working with serial cameras."
 authors = ["Georg John <georg.john@dfki.de>"]
 readme = "README.md"
 packages = [{include = "camera_kit"}]
