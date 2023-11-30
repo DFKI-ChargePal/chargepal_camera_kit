@@ -95,3 +95,4 @@ class CameraRealSense(CameraBase):
         if self.alive:
             self.alive = False
             self.pipeline.stop()
+        super().destroy()

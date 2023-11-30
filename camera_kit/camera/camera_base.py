@@ -6,11 +6,13 @@ import copy
 import tomli
 import tomli_w
 import logging
+import cv2 as cv
 import numpy as np
 from pathlib import Path
 from tomlkit import document
 from threading import Thread
 # local
+from camera_kit.view.display import Display
 from camera_kit.camera import CameraCoefficient
 # typing
 import numpy.typing as npt
@@ -38,19 +40,39 @@ class CameraBase(metaclass=abc.ABCMeta):
         self.coeffs_path = Path(self.cam_info_dir).joinpath('calibration', 'coefficients.toml')
 
         # Color frame
-        self.color_frame = np.zeros((3,) + self.size, dtype=np.uint8).T
+        self.color_frame = cv.cvtColor(np.zeros((3,) + self.size, dtype=np.uint8).T, cv.COLOR_RGB2BGR)
         # Camera coefficients
         self.cc = CameraCoefficient()
         self.is_calibrated = False
         self.log_calib_msg = True
         # Create thread
+        self._display: Display | None = None
         self.thread = Thread(target=self.update, args=(), daemon=True)
+
+    @property
+    def display(self) -> Display:
+        if self._display is not None:
+            return self._display
+        else:
+            raise RuntimeError(f"There is no display yet. Please add first via interface.")
 
     def get_color_frame(self) -> npt.NDArray[np.uint8]:
         if self.log_calib_msg and not self.is_calibrated:
             LOGGER.debug("Camera is not calibrated. Coefficients are default values!")
             self.log_calib_msg = False
         return np.array(self.color_frame, dtype=np.uint8)
+
+    def add_display(self, name: str = "") -> None:
+        if len(name) <= 0:
+            name = self.name
+        self._display = Display(name)
+
+    def render(self, frame: npt.NDArray[np.uint8] | None = None) -> None:
+        if self._display is None:
+            self.add_display()
+        if frame is None:
+            frame = self.get_color_frame()
+        self.display.show(frame)
 
     def load_coefficients(self, file_path: str = "") -> None:
         """ Class method to load camera coefficients
@@ -109,6 +131,15 @@ class CameraBase(metaclass=abc.ABCMeta):
             tomli_w.dump(toml, f)
         LOGGER.debug(f"Save new camera coefficients in folder {str(fp.parent)}")
 
+    def destroy(self) -> None:
+        """ Class method to end/destroy the specific camera stream
+
+        Returns:
+            None
+        """
+        if self._display is not None:
+            self._display.destroy()
+
     @abc.abstractmethod
     def start(self) -> None:
         """ Abstract class method to start video stream
@@ -121,15 +152,6 @@ class CameraBase(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def update(self) -> None:
         """ Abstract class method which will be called by the thread to update the image stream
-
-        Returns:
-            None
-        """
-        raise NotImplementedError("Must be implemented in subclass")
-
-    @abc.abstractmethod
-    def destroy(self) -> None:
-        """ Abstract class method to end/destroy the specific camera stream
 
         Returns:
             None

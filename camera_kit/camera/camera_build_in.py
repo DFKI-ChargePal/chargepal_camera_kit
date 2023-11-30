@@ -41,3 +41,4 @@ class CameraBuildIn(CameraBase):
         self.alive = False
         if self.cap is not None:
             self.cap.release()
+        super().destroy()

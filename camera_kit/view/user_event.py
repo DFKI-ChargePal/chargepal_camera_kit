@@ -10,7 +10,7 @@ class EventObserver:
         QUIT = auto()
         SAVE = auto()
         PAUSE = auto()
-        CONTINUE = auto()
+        RESUME = auto()
         ERROR = auto()
 
     state = Type.OK
@@ -24,8 +24,8 @@ class EventObserver:
             EventObserver.state = EventObserver.Type.SAVE
         elif new_event in [ord('p'), ord('P')]:
             EventObserver.state = EventObserver.Type.PAUSE
-        elif new_event in [ord('c'), ord('C'), 32]:  # 32 == SPACE
-            EventObserver.state = EventObserver.Type.CONTINUE
+        elif new_event in [ord('r'), ord('R'), 32]:  # 32 == SPACE
+            EventObserver.state = EventObserver.Type.RESUME
         else:
             EventObserver.state = EventObserver.Type.OK
 
