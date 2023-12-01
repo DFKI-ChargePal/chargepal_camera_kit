@@ -44,13 +44,52 @@ with ck.camera_manager('build_in_camera') as cm:
 ```
 To stop the program press `ESC` or `Q` on your keyboard
 
-### Camera Calibration
+### Further demos
+
+More demos can be found under the folder [demos](demos)
+
+
+## Documentation
+
+To show the library documentation install the docs dependencies of this package
+
+```shell
+poetry install --with docs
+```
+
+Afterward you can start a local server and open the documentation in your browser
+```shell
+mkdocs serve
+```
 
 
 ## Implement an own camera class
 
+You can add your own camera by creating a concrete class of the abstract class `CameraBase`
+
 ```python
+from camera_kit import CameraBase
 
+class MyCamera(CameraBase):
+    
+    _type_id = "my_camera"
 
+    def __init__(self, name, frame_size):
+        super().__init__(name, frame_size)
 
+    def start(self):
+        # Set up your camera stream
+        # ...
+        self.alive = True
+        self.thread.start()
+
+    def update(self):
+        new_frame = None
+        # Read next frame from your camera and convert it to a numpy array
+        self.color_frame = new_frame
+
+    def destroy(self):
+        self.alive = False
+        # Shut down your camera
+        super().destroy()
 ```
