@@ -2,7 +2,10 @@ from __future__ import annotations
 
 # global
 import os
+import time
+import shutil
 import logging
+
 import cv2 as cv
 import numpy as np
 from tqdm import tqdm
@@ -53,7 +56,8 @@ class CameraCalibration:
         """
         # Create target directory
         target_dir = Path(dir_path) if dir_path else camera.cam_info_dir.joinpath('calibration', 'imgs')
-        target_dir.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(target_dir)
+        target_dir.mkdir(parents=True)
 
         if not camera.alive:
             camera.start()
@@ -105,40 +109,54 @@ class CameraCalibration:
 
         # Read calibration images and find chessboard corners
         img_paths = list(dp.glob("*.png"))
-        for i in tqdm(range(len(img_paths))):
-            # Read images from storage
-            img = cv.imread(os.fspath(img_paths[i]))
-            gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-            # Find chessboard corners
-            ret, corners = cv.findChessboardCorners(gray, board.board_size, CameraCalibration._find_chessboard_flags)
-            if ret:
-                obj_points.append(objp)
-                corners = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), CameraCalibration._find_corner_criteria)
-                img_points.append(corners)
+        n_imgs = len(img_paths)
+        if n_imgs > 0:
+            LOGGER.info(f"Using {n_imgs} images to find camera coefficients.")
+            usable_imgs = 0
+            for i in tqdm(range(n_imgs), ascii=True, ncols=99):
+                # Read images from storage
+                img = cv.imread(os.fspath(img_paths[i]))
+                gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                # Find chessboard corners
+                ret, corners = cv.findChessboardCorners(gray, board.board_size, CameraCalibration._find_chessboard_flags)
+                if ret:
+                    obj_points.append(objp)
+                    corners = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), CameraCalibration._find_corner_criteria)
+                    img_points.append(corners)
+                    usable_imgs += 1
+                    if display:
+                        # Draw and display the corners
+                        cv.drawChessboardCorners(img, board.board_size, corners, ret)
+                        camera.render(img)
+                        time.sleep(0.5)
+            LOGGER.info(f"Found corners for {usable_imgs}/{n_imgs} images ")
+            if usable_imgs > 0:
+                # ########################### #
+                # ####### CALIBRATION ####### #
+                # ########################### #
+                rep_err, camera_mtx, dist_coeffs, r_vecs, t_vecs = cv.calibrateCamera(
+                    obj_points, img_points, camera.size, None, None
+                )
 
-                if display:
-                    # Draw and display the corners
-                    cv.drawChessboardCorners(img, board.board_size, corners, ret)
-                    camera.render(img)
+                LOGGER.debug('\nCalibration result:')
+                LOGGER.debug('\nRe-projection error:\n%s', rep_err)
+                LOGGER.debug('\nCamera intrinsic coefficients:\n%s', camera_mtx)
+                LOGGER.debug('\nDistortion coefficients:\n%s', dist_coeffs.tolist())
+                LOGGER.debug('\nRotation vectors:')
+                for r_v in [v.tolist() for v in r_vecs]:
+                    LOGGER.debug(r_v)
+                LOGGER.debug('\nTranslation vectors:')
+                for t_v in [v.tolist() for v in t_vecs]:
+                    LOGGER.debug(t_v)
 
-        # ########################### #
-        # ####### CALIBRATION ####### #
-        # ########################### #
-        rep_err, camera_mtx, dist_coeffs, r_vecs, t_vecs = cv.calibrateCamera(
-            obj_points, img_points, camera.size, None, None
-        )
+                # Store camera coefficients
+                cc = CameraCoefficient(camera_mtx, dist_coeffs)
+                LOGGER.info(f"Calibration successfully")
+            else:
+                cc = CameraCoefficient()
+                LOGGER.warning(f"Could not find chessboard corners in the records. Calibration not successfully")
+        else:
+            LOGGER.warning(f"Not enough image records to run calibration")
+            cc = CameraCoefficient()
 
-        LOGGER.debug('\nCalibration result:')
-        LOGGER.debug('\nRe-projection error:\n%s', rep_err)
-        LOGGER.debug('\nCamera intrinsic coefficients:\n%s', camera_mtx)
-        LOGGER.debug('\nDistortion coefficients:\n%s', dist_coeffs.tolist())
-        LOGGER.debug('\nRotation vectors:')
-        for r_v in [v.tolist() for v in r_vecs]:
-            LOGGER.debug(r_v)
-        LOGGER.debug('\nTranslation vectors:')
-        for t_v in [v.tolist() for v in t_vecs]:
-            LOGGER.debug(t_v)
-
-        # Store camera coefficients
-        cc = CameraCoefficient(camera_mtx, dist_coeffs)
         return cc
