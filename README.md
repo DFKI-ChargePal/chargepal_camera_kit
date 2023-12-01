@@ -48,3 +48,9 @@ To stop the program press `ESC` or `Q` on your keyboard
 
 
 ## Implement an own camera class
+
+```python
+
+
+
+```
