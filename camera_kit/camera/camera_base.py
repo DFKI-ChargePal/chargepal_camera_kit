@@ -87,11 +87,11 @@ class CameraBase(metaclass=abc.ABCMeta):
             fp = Path(file_path)
             # Check if path exist
             if not fp.is_file():
-                raise ValueError(f"File with given path '{str(fp)}' not found.")
+                raise FileNotFoundError(f"File with given path '{str(fp)}' not found.")
         else:
             fp = self.coeffs_path
             if not fp.is_file():
-                raise ValueError(f"File with default path '{str(fp)}' not found.")
+                raise FileNotFoundError(f"File with default path '{str(fp)}' not found.")
 
         with fp.open(mode='rb') as f:
             coeffs = tomli.load(f)
