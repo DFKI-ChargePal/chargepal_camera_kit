@@ -13,9 +13,11 @@ pyrealsense2 = "^2.54.2.5684"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 tomlkit = "^0.12.3"
+tqdm = "^4.66.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.7.1"
+types-tqdm = "^4.66.0.5"
 
 [build-system]
 requires = ["poetry-core"]
