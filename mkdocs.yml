@@ -2,9 +2,12 @@ site_name: Camera Kit Docs
 
 theme:
   name: "readthedocs"
-
-#  features:
-#    - navigation.path
+  highlightjs: true
+  include_homepage_in_sidebar: false
+  navigation_depth: 4
+  collapse_navigation: true
+  titles_only: false
+  sticky_navigation: true
 
 plugins:
   - mkdocstrings
