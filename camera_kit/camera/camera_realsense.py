@@ -1,13 +1,18 @@
 from __future__ import annotations
+
 # global
 import logging
 import cv2 as cv
 import numpy as np
 import pyrealsense2 as rs
+
 # local
 from camera_kit.camera.camera_base import CameraBase
+
 # typing
-import numpy.typing as npt
+from typing import Any
+from numpy import typing as npt
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,39 +20,47 @@ LOGGER = logging.getLogger(__name__)
 class CameraRealSense(CameraBase):
 
     _type_id = "realsense"
+    _instance = None
 
-    def __init__(self,
-                 name: str,
-                 size: tuple[int, int] = (1280, 720),
-                 launch: bool = True) -> None:
-        # Initialize super class
-        super().__init__(name, size)
-        # Configure depth and color streams
-        self.pipeline = rs.pipeline()
-        self.config = rs.config()
-        # Get device product line for setting a supporting resolution
-        pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
-        pipeline_profile = self.config.resolve(pipeline_wrapper)
-        device = pipeline_profile.get_device()
-        device_product_line = str(device.get_info(rs.camera_info.product_line))
-        LOGGER.debug(f"\nHello RealSense camera {device_product_line}")
-        # Search for rgb sensor
-        found_rgb = False
-        for s in device.sensors:
-            if s.get_info(rs.camera_info.name) == 'RGB Camera':
-                found_rgb = True
-                break
-        if not found_rgb:
-            LOGGER.error("The demo requires Depth camera with Color sensor")
-            exit(0)
-        # Get depth sensor scale
-        depth_sensor = device.first_depth_sensor()
-        self.depth_scale = depth_sensor.get_depth_scale()
-        LOGGER.debug(f"Depth Scale is: {self.depth_scale}")
-        # Set up additional depth frame
-        self.depth_frame = np.zeros((3,) + self.size, dtype=np.uint8).T
-        if launch:
-            self.start()
+    def __new__(cls, *args: Any, **kwargs: Any) -> CameraRealSense:
+        if not isinstance(cls._instance, cls):
+            cls._instance = super(CameraRealSense, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, name: str, frame_size: tuple[int, int] = (1280, 720), launch: bool = True) -> None:
+        if self.alive:
+            super().destroy()
+            self.name = name
+            self.size = frame_size
+        else:
+            # Initialize super class
+            super().__init__(name, frame_size)
+            # Configure depth and color streams
+            self.pipeline = rs.pipeline()
+            self.config = rs.config()
+            # Get device product line for setting a supporting resolution
+            pipeline_wrapper = rs.pipeline_wrapper(self.pipeline)
+            pipeline_profile = self.config.resolve(pipeline_wrapper)
+            device = pipeline_profile.get_device()
+            device_product_line = str(device.get_info(rs.camera_info.product_line))
+            LOGGER.debug(f"\nHello RealSense camera {device_product_line}")
+            # Search for rgb sensor
+            found_rgb = False
+            for s in device.sensors:
+                if s.get_info(rs.camera_info.name) == 'RGB Camera':
+                    found_rgb = True
+                    break
+            if not found_rgb:
+                LOGGER.error("The demo requires Depth camera with Color sensor")
+                exit(0)
+            # Get depth sensor scale
+            depth_sensor = device.first_depth_sensor()
+            self.depth_scale = depth_sensor.get_depth_scale()
+            LOGGER.debug(f"Depth Scale is: {self.depth_scale}")
+            # Set up additional depth frame
+            self.depth_frame = np.zeros((3,) + self.size, dtype=np.uint8).T
+            if launch:
+                self.start()
 
     def start(self) -> None:
         # Configure streams

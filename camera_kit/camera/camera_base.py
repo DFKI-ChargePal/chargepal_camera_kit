@@ -15,8 +15,7 @@ from threading import Thread
 from camera_kit.view.display import Display
 from camera_kit.camera import CameraCoefficient
 # typing
-import numpy.typing as npt
-
+from numpy import typing as npt
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,6 +23,7 @@ LOGGER = logging.getLogger(__name__)
 class CameraBase(metaclass=abc.ABCMeta):
 
     type_id = ""
+    alive = False
 
     def __init__(self, name: str, frame_size: tuple[int, int]):
         """ Camera base class
@@ -34,7 +34,6 @@ class CameraBase(metaclass=abc.ABCMeta):
         """
         self.name = name
         self.size = frame_size
-        self.alive = False
 
         self.cam_info_dir = Path.cwd().joinpath('camera_info', self.name)
         self.coeffs_path = Path(self.cam_info_dir).joinpath('calibration', 'coefficients.toml')
@@ -139,6 +138,7 @@ class CameraBase(metaclass=abc.ABCMeta):
         """
         if self._display is not None:
             self._display.destroy()
+            self._display = None
 
     @abc.abstractmethod
     def start(self) -> None:
