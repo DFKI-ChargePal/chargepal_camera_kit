@@ -55,11 +55,11 @@ class DetectorBase(metaclass=abc.ABCMeta):
         if not self._camera.is_calibrated:
             self._camera.load_coefficients()
 
-    def find_pose(self, object_id: str, render: bool = False) -> tuple[bool, npt.NDArray[np.float_]]:
+    def find_pose(self, object_name: str, render: bool = False) -> tuple[bool, npt.NDArray[np.float_]]:
         """ Method to find object pose estimate
 
         Args:
-            object_id: Unique name of the searched object type
+            object_name: Unique name of the searched object type
             render:    If results should be shown on display or not
 
         Returns:
@@ -67,7 +67,7 @@ class DetectorBase(metaclass=abc.ABCMeta):
             Note: Rotation vector is expressed with Rodrigues formula following OpenCV style
         """
         img = self.camera.get_color_frame()
-        _ret, _pose = self._find_pose(object_id)
+        _ret, _pose = self._find_pose(object_name)
         if render:
             if _ret:
                 r_vec, t_vec = _pose[0], _pose[1]
@@ -76,8 +76,11 @@ class DetectorBase(metaclass=abc.ABCMeta):
         return _ret, _pose
 
     @abc.abstractmethod
-    def _find_pose(self, object_id: str) -> tuple[bool, npt.NDArray[np.float_]]:
+    def _find_pose(self, object_name: str) -> tuple[bool, npt.NDArray[np.float_]]:
         """ Abstract class method to get the object pose estimate
+
+        Args:
+            object_name: Unique name of the searched object type
 
         Returns:
             (True if pose was found; Pose as numpy array. Containing the rotation and translation vector)
