@@ -1,43 +1,43 @@
 from camera_kit.view.user_event import EventObserver
 
+# typing
+from typing import Callable
 
+
+def event(func: Callable[[], bool]) -> Callable[[], bool]:
+    def on_event() -> bool:
+        is_event = func()
+        if is_event:
+            EventObserver.state = EventObserver.Type.OK
+        return is_event
+    return on_event
+
+
+@event
 def ok() -> bool:
-    ret = EventObserver.state == EventObserver.Type.OK
-    if ret:
-        EventObserver.state = EventObserver.Type.OK
-    return ret
+    return EventObserver.state == EventObserver.Type.OK
 
 
+@event
 def stop() -> bool:
-    ret = EventObserver.state == EventObserver.Type.QUIT
-    if ret:
-        EventObserver.state = EventObserver.Type.OK
-    return ret
+    return EventObserver.state == EventObserver.Type.QUIT
 
 
+@event
 def save() -> bool:
-    ret = EventObserver.state == EventObserver.Type.SAVE
-    if ret:
-        EventObserver.state = EventObserver.Type.OK
-    return ret
+    return EventObserver.state == EventObserver.Type.SAVE
 
 
+@event
 def error() -> bool:
-    ret = EventObserver.state == EventObserver.Type.ERROR
-    if ret:
-        EventObserver.state = EventObserver.Type.OK
-    return ret
+    return EventObserver.state == EventObserver.Type.ERROR
 
 
+@event
 def pause() -> bool:
-    ret = EventObserver.state == EventObserver.Type.PAUSE
-    if ret:
-        EventObserver.state = EventObserver.Type.OK
-    return ret
+    return EventObserver.state == EventObserver.Type.PAUSE
 
 
+@event
 def resume() -> bool:
-    ret = EventObserver.state == EventObserver.Type.RESUME
-    if ret:
-        EventObserver.state = EventObserver.Type.OK
-    return ret
+    return EventObserver.state == EventObserver.Type.RESUME
