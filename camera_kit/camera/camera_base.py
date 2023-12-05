@@ -110,7 +110,7 @@ class CameraBase(metaclass=abc.ABCMeta):
             frame = self.get_color_frame()
         self.display.show(frame)
 
-    def load_coefficients(self, file_path: str = "") -> None:
+    def load_coefficients(self, file_path: Path | str = "") -> None:
         """ Class method to load camera coefficients
 
         Args:
@@ -136,7 +136,7 @@ class CameraBase(metaclass=abc.ABCMeta):
         self.is_calibrated = True
         LOGGER.debug(f"Load camera coefficients successfully.")
 
-    def save_coefficients(self, cc: CameraCoefficient, file_path: str = "") -> None:
+    def save_coefficients(self, cc: CameraCoefficient, file_path: Path | str = "") -> None:
         """ Set camera coefficients and save them in the (optionally) given file_path
         as coefficients.toml.
 
