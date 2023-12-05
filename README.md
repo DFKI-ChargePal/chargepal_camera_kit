@@ -72,24 +72,30 @@ from camera_kit import CameraBase
 
 
 class MyCamera(CameraBase):
+    
     type_id = "my_camera"
 
-    def __init__(self, name, frame_size):
-        super().__init__(name, frame_size)
+    def __init__(self, name, frame_size, launch):
+        super().__init__(name, frame_size, launch)
 
     def start(self):
-        # Set up your camera stream
-        # ...
-        self.alive = True
-        self.thread.start()
+        # Call start procedure of base class
+        self._on_start()
+        if not self.alive:
+            # Set up your camera stream
+            # ...
+            self.alive = True
+            assert self._thread
+            self._thread.start()
 
     def update(self):
         new_frame = None
         # Read next frame from your camera and convert it to a numpy array
         self.color_frame = new_frame
 
-    def destroy(self):
-        self.alive = False
-        # Shut down your camera
-        super().destroy()
+    def end(self):
+        # Call end procedure of base class
+        self._on_end()
+        # Destroy/Release your camera stream
+        # ...
 ```
