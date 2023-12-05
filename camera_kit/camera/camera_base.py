@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__)
 
 class CameraBase(metaclass=abc.ABCMeta):
 
-    _type_id = ""
+    type_id = ""
     alive = False
     _instance = None
     _name = ""

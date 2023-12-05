@@ -70,9 +70,9 @@ You can add your own camera by creating a concrete class of the abstract class `
 ```python
 from camera_kit import CameraBase
 
+
 class MyCamera(CameraBase):
-    
-    _type_id = "my_camera"
+    type_id = "my_camera"
 
     def __init__(self, name, frame_size):
         super().__init__(name, frame_size)

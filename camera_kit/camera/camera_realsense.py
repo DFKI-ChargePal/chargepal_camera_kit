@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 
 class CameraRealSense(CameraBase):
 
-    _type_id = "realsense"
+    type_id = "realsense"
     _rs_cfg: rs.config | None = None
     _rs_pipeline: rs.pipeline | None = None
 

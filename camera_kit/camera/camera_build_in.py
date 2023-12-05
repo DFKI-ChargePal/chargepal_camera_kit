@@ -15,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 class CameraBuildIn(CameraBase):
 
-    _type_id = "build_in"
+    type_id = "build_in"
     # OpenCV camera capture
     _cap: cv.VideoCapture | None = None
 

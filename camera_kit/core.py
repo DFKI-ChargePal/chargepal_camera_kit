@@ -15,7 +15,7 @@ def camera_manager(name: str, logger_level: int = logging.INFO, **kwargs: Any) -
     try:
         yield cam
     finally:
-        cam.destroy()
+        cam.end()
 
 
 def create(name: str, logger_level: int = logging.INFO, **kwargs: Any) -> CameraBase:
