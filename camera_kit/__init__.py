@@ -10,6 +10,7 @@ from camera_kit.calibration.camera_calibration import (
     CameraCalibration,
     ChessboardDescription,
 )
+from camera_kit.detector.detector_base import DetectorBase
 
 
 __all__ = [
@@ -25,4 +26,7 @@ __all__ = [
     "CameraBase",
     "CameraCalibration",
     "ChessboardDescription",
+
+    # interfaces
+    "DetectorBase"
 ]
