@@ -15,6 +15,7 @@ from threading import Thread
 from camera_kit.view.display import Display
 from camera_kit.camera import CameraCoefficient
 # typing
+from typing import Any
 from numpy import typing as npt
 
 LOGGER = logging.getLogger(__name__)
@@ -22,31 +23,56 @@ LOGGER = logging.getLogger(__name__)
 
 class CameraBase(metaclass=abc.ABCMeta):
 
-    type_id = ""
+    _type_id = ""
     alive = False
+    _instance = None
+    _name = ""
+    _frame_size = (0, 0)
+    _thread: Thread | None = None
+    _display: Display | None = None
 
-    def __init__(self, name: str, frame_size: tuple[int, int]):
+    def __new__(cls, *args: Any, **kwargs: Any) -> CameraBase:
+        if not isinstance(cls._instance, cls):
+            cls._instance = super(CameraBase, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, name: str, frame_size: tuple[int, int], launch: bool):
         """ Camera base class
 
         Args:
             name:       Name of the camera
             frame_size: Image size in pixels
         """
-        self.name = name
-        self.size = frame_size
+        if self._frame_size != frame_size:
+            self.end()
+        if self._name != name:
+            self.remove_display()
 
-        self.cam_info_dir = Path.cwd().joinpath('camera_info', self.name)
+        self._name = name
+        self._frame_size = frame_size
+
+        self.cam_info_dir = Path.cwd().joinpath('camera_info', self._name)
         self.coeffs_path = Path(self.cam_info_dir).joinpath('calibration', 'coefficients.toml')
 
         # Color frame
-        self.color_frame = cv.cvtColor(np.zeros((3,) + self.size, dtype=np.uint8).T, cv.COLOR_RGB2BGR)
+        self.color_frame = cv.cvtColor(np.zeros((3,) + self._frame_size, dtype=np.uint8).T, cv.COLOR_RGB2BGR)
+        self.depth_frame = np.zeros((3,) + self._frame_size, dtype=np.uint8).T
         # Camera coefficients
         self.cc = CameraCoefficient()
         self.is_calibrated = False
         self.log_calib_msg = True
+        if launch:
+            self.start()
+
+    def _on_start(self) -> None:
         # Create thread
-        self._display: Display | None = None
-        self.thread = Thread(target=self.update, args=(), daemon=True)
+        if self._thread is None:
+            self._thread = Thread(target=self.update, args=(), daemon=True)
+
+    def _on_end(self) -> None:
+        self.alive = False
+        self._thread = None
+        self.remove_display()
 
     @property
     def display(self) -> Display:
@@ -61,10 +87,21 @@ class CameraBase(metaclass=abc.ABCMeta):
             self.log_calib_msg = False
         return np.array(self.color_frame, dtype=np.uint8)
 
+    def get_depth_frame(self) -> npt.NDArray[np.uint8]:
+        if self.log_calib_msg and not self.is_calibrated:
+            LOGGER.debug("Camera is not calibrated. Coefficients are default values!")
+            self.log_calib_msg = False
+        return np.array(self.depth_frame, dtype=np.uint8)
+
     def add_display(self, name: str = "") -> None:
         if len(name) <= 0:
-            name = self.name
+            name = self._name
         self._display = Display(name)
+
+    def remove_display(self) -> None:
+        if self._display is not None:
+            self._display.destroy()
+            self._display = None
 
     def render(self, frame: npt.NDArray[np.uint8] | None = None) -> None:
         if self._display is None:
@@ -130,16 +167,6 @@ class CameraBase(metaclass=abc.ABCMeta):
             tomli_w.dump(toml, f)
         LOGGER.debug(f"Save new camera coefficients in folder {str(fp.parent)}")
 
-    def destroy(self) -> None:
-        """ Class method to end/destroy the specific camera stream
-
-        Returns:
-            None
-        """
-        if self._display is not None:
-            self._display.destroy()
-            self._display = None
-
     @abc.abstractmethod
     def start(self) -> None:
         """ Abstract class method to start video stream
@@ -152,6 +179,15 @@ class CameraBase(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def update(self) -> None:
         """ Abstract class method which will be called by the thread to update the image stream
+
+        Returns:
+            None
+        """
+        raise NotImplementedError("Must be implemented in subclass")
+
+    @abc.abstractmethod
+    def end(self) -> None:
+        """ Class method to end/destroy the specific camera stream
 
         Returns:
             None

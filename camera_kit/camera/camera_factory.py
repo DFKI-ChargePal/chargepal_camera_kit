@@ -12,7 +12,7 @@ class CameraFactory:
 
     @staticmethod
     def available_cameras() -> list[str]:
-        return [CameraBuildIn.type_id, CameraRealSense.type_id]
+        return [CameraBuildIn._type_id, CameraRealSense._type_id]
 
     @staticmethod
     def create(name: str, **kwargs: Any) -> CameraBase:

@@ -135,7 +135,7 @@ class CameraCalibration:
                 # ####### CALIBRATION ####### #
                 # ########################### #
                 rep_err, camera_mtx, dist_coeffs, r_vecs, t_vecs = cv.calibrateCamera(
-                    obj_points, img_points, camera.size, None, None
+                    obj_points, img_points, camera._frame_size, None, None
                 )
 
                 LOGGER.debug('\nCalibration result:')

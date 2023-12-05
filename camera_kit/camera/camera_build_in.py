@@ -3,12 +3,11 @@ from __future__ import annotations
 # global
 import logging
 import cv2 as cv
+import numpy as np
+from numpy import typing as npt
 
 # local
 from camera_kit.camera.camera_base import CameraBase
-
-# typing
-from typing import Any
 
 
 LOGGER = logging.getLogger(__name__)
@@ -17,42 +16,32 @@ LOGGER = logging.getLogger(__name__)
 class CameraBuildIn(CameraBase):
 
     _type_id = "build_in"
-    _instance = None
-
-    def __new__(cls, *args: Any, **kwargs: Any) -> CameraBuildIn:
-        if not isinstance(cls._instance, cls):
-            cls._instance = super(CameraBuildIn, cls).__new__(cls)
-        return cls._instance
+    # OpenCV camera capture
+    _cap: cv.VideoCapture | None = None
 
     def __init__(self, name: str, frame_size: tuple[int, int] = (1280, 720), launch: bool = True) -> None:
-        if self.alive:
-            super().destroy()
-            self.name = name
-            self.size = frame_size
-        else:
-            # Initialize super class
-            super().__init__(name, frame_size)
-            # OpenCV camera capture
-            self.cap: cv.VideoCapture | None = None
-            if launch:
-                self.start()
+        super().__init__(name, frame_size, launch)
+
+    def get_depth_frame(self) -> npt.NDArray[np.uint8]:
+        raise NotImplementedError(f"Build in camera didn't provide depth information!")
 
     def start(self) -> None:
-        # Create OpenCV video capture and start video stream
-        self.cap = cv.VideoCapture(0)
-        self.alive = True
-        self.thread.start()
+        self._on_start()
+        if not self.alive:
+            # Create OpenCV video capture and start video stream
+            self._cap = cv.VideoCapture(0)
+            self.alive = True
+            assert self._thread
+            self._thread.start()
 
     def update(self) -> None:
-        assert self.cap
+        assert self._cap
         while self.alive:
-            self.alive, raw_frame = self.cap.read()
+            self.alive, raw_frame = self._cap.read()
             if self.alive:
-                self.color_frame = cv.resize(raw_frame, self.size, interpolation=cv.INTER_CUBIC)
+                self.color_frame = cv.resize(raw_frame, self._frame_size, interpolation=cv.INTER_CUBIC)
 
-    def destroy(self) -> None:
-        if self.alive:
-            self.alive = False
-            if self.cap is not None:
-                self.cap.release()
-        super().destroy()
+    def end(self) -> None:
+        self._on_end()
+        if self._cap is not None:
+            self._cap.release()
