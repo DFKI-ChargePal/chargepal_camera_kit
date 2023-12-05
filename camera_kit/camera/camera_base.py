@@ -136,25 +136,22 @@ class CameraBase(metaclass=abc.ABCMeta):
         self.is_calibrated = True
         LOGGER.debug(f"Load camera coefficients successfully.")
 
-    def save_coefficients(self, cc: CameraCoefficient, file_path: Path | str = "") -> None:
+    def save_coefficients(self, cc: CameraCoefficient, dir_path: Path | str = "") -> None:
         """ Set camera coefficients and save them in the (optionally) given file_path
         as coefficients.toml.
 
         Args:
-            cc: The camera intrinsic and distortion coefficient object
-            file_path: Optional file path where the coefficients are saved
-
-        Returns:
-            None
+            cc:       The camera intrinsic and distortion coefficient object
+            dir_path: Optional directory path where the coefficients are saved
         """
         # Update camera coefficients
         self.cc = copy.copy(cc)
         self.is_calibrated = True
-        if file_path:
-            # create target directory
-            if not os.path.isdir(file_path):
-                raise FileNotFoundError(f"Directory with given path '{file_path}' not found.")
-            fp = Path(file_path).joinpath('coefficients.toml')
+        if dir_path:
+            dir_path = Path(dir_path)
+            if not dir_path.is_dir():
+                raise NotADirectoryError(f"Directory with given path '{dir_path}' not found.")
+            fp = Path(dir_path).joinpath('coefficients.toml')
         else:
             fp = self.coeffs_path
         fp.parent.mkdir(parents=True, exist_ok=True)
