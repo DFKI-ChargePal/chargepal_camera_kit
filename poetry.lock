@@ -1003,6 +1003,17 @@ slack = ["slack-sdk"]
 telegram = ["requests"]
 
 [[package]]
+name = "types-pyyaml"
+version = "6.0.12.12"
+description = "Typing stubs for PyYAML"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-PyYAML-6.0.12.12.tar.gz", hash = "sha256:334373d392fde0fdf95af5c3f1661885fa10c52167b14593eb856289e1855062"},
+    {file = "types_PyYAML-6.0.12.12-py3-none-any.whl", hash = "sha256:c05bc6c158facb0676674b7f11fe3960db4f389718e19e62bd2b84d6205cfd24"},
+]
+
+[[package]]
 name = "types-tqdm"
 version = "4.66.0.5"
 description = "Typing stubs for tqdm"
@@ -1097,4 +1108,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "cc65bc2b2ae8f01cc31ed8685d83a89bf406c134b6f4c207b4d8922bb8389ed2"
+content-hash = "fa47bcd67cf961a722162cb678690762fb662079d7c07d81fc0efb51bc6ebdd9"
