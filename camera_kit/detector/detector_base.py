@@ -30,12 +30,13 @@ class DetectorBase(metaclass=abc.ABCMeta):
         config_fp = Path(config_file)
         if not config_fp.exists():
             raise FileNotFoundError(f"Can't find configuration file under: {config_fp}")
+        self.config_fp = config_fp
         # load configuration
-        with config_fp.open("r") as filestream:
+        with self.config_fp.open("r") as filestream:
             try:
                 self.config: dict[str, Any] = yaml.safe_load(filestream)
             except yaml.YAMLError as e:
-                LOGGER.error(f"Error while reading {config_fp.name} configuration. {e}")
+                LOGGER.error(f"Error while reading {self.config_fp.name} configuration. {e}")
         self._camera: CameraBase | None = None  # Camera reference
 
     @property
