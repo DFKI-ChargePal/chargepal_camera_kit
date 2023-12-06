@@ -34,8 +34,9 @@ class DetectorBase(metaclass=abc.ABCMeta):
         with self.config_fp.open("r") as filestream:
             try:
                 self.config: dict[str, Any] = yaml.safe_load(filestream)
-            except yaml.YAMLError as e:
-                LOGGER.error(f"Error while reading {self.config_fp.name} configuration. {e}")
+            except Exception as e:
+                raise RuntimeError(f"Error while reading {self.config_fp.name} configuration. {e}")
+
         self._camera: CameraBase | None = None  # Camera reference
 
     @property
