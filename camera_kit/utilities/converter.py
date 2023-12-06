@@ -19,7 +19,7 @@ def pq_to_cv(pq: PosOrinType) -> tuple[npt.NDArray[np.float_], npt.NDArray[np.fl
         Rotation vector and translation vector as numpy arrays
     """
     t_vec = np.reshape(pq[0], 3)
-    r_vec = R.from_quat(pq[1]).as_rotvec()
+    r_vec = np.reshape(R.from_quat(pq[1]).as_rotvec(), 3)
     return r_vec, t_vec
 
 
@@ -33,6 +33,6 @@ def cv_to_pq(r_vec: npt.NDArray[np.float_], t_vec: npt.NDArray[np.float_]) -> Po
     Returns:
         Position vector in xyz order and quaternion in wxyz order
     """
-    p = tuple(t_vec.tolist())
-    q = tuple(R.from_rotvec(r_vec).as_quat().tolist())
+    p = tuple(np.reshape(t_vec, 3).tolist())
+    q = tuple(R.from_rotvec(np.reshape(r_vec, 3)).as_quat().tolist())
     return p, q
