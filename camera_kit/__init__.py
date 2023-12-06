@@ -2,6 +2,7 @@ from camera_kit.core import (
     create,
     camera_manager
 )
+from camera_kit.utilities import converter
 from camera_kit.view.drawing import Drawing
 import camera_kit.utilities.base_logger as logger
 import camera_kit.view.user_signals as user_signal
@@ -28,5 +29,8 @@ __all__ = [
     "ChessboardDescription",
 
     # interfaces
-    "DetectorBase"
+    "DetectorBase",
+
+    # modules
+    "converter",
 ]
