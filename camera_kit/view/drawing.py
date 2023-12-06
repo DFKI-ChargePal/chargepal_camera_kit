@@ -5,9 +5,11 @@ import numpy as np
 
 # local
 from camera_kit.camera.camera_base import CameraBase
+from camera_kit.utilities.converter import pq_to_cv
 
 # typing
 from numpy import typing as npt
+from camera_kit.core import PosOrinType
 
 
 class Drawing:
@@ -140,8 +142,7 @@ class Drawing:
     @staticmethod
     def frame_axes(cam: CameraBase,
                    img: npt.NDArray[np.uint8],
-                   rot_vector: npt.NDArray[np.float64],
-                   trans_vector: npt.NDArray[np.float64],
+                   pq: PosOrinType,
                    frame_length: float,
                    ) -> npt.NDArray[np.uint8]:
         """ Draw coordinate axes on the image.
@@ -149,17 +150,17 @@ class Drawing:
         Args:
             cam:          The camera object
             img:          The source image where to draw the axes
-            rot_vector:   Rotation vector of the pose in camera frame
-            trans_vector: Translation vector of the pose in camera frame
+            pq:           Position and orientation of the frame
             frame_length: Length of the axes [m]
 
         Returns:
             The manipulated image
         """
+        r_vec, t_vec = pq_to_cv(pq)
         cv.drawFrameAxes(img,
                          cam.cc.intrinsic,
                          cam.cc.distortion,
-                         rot_vector, trans_vector,
+                         r_vec, t_vec,
                          length=frame_length,
                          thickness=Drawing.frame_axes_thickness)
         return img

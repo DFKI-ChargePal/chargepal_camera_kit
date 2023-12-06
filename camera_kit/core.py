@@ -6,7 +6,10 @@ from camera_kit.utilities.base_logger import set_logging_level
 from camera_kit.camera.camera_base import CameraBase
 from camera_kit.camera.camera_factory import CameraFactory
 # typing
-from typing import Any, Iterator
+from typing import Any, Iterator, Tuple
+
+
+PosOrinType = Tuple[Tuple[float, float, float], Tuple[float, float, float, float]]
 
 
 @contextmanager

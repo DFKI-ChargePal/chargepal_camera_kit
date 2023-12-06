@@ -4,7 +4,6 @@ from __future__ import annotations
 import abc
 import yaml
 import logging
-import numpy as np
 from pathlib import Path
 
 # local
@@ -13,7 +12,7 @@ from camera_kit.camera.camera_base import CameraBase
 
 # typing
 from typing import Any
-from numpy import typing as npt
+from camera_kit.core import PosOrinType
 
 
 LOGGER = logging.getLogger(__name__)
@@ -56,35 +55,28 @@ class DetectorBase(metaclass=abc.ABCMeta):
         if not self._camera.is_calibrated:
             self._camera.load_coefficients()
 
-    def find_pose(self, object_name: str, render: bool = False) -> tuple[bool, npt.NDArray[np.float_]]:
+    def find_pose(self, render: bool = False) -> tuple[bool, PosOrinType]:
         """ Method to find object pose estimate
 
         Args:
-            object_name: Unique name of the searched object type
             render:    If results should be shown on display or not
 
         Returns:
-            (True if pose was found; Pose as numpy array. Containing the rotation and translation vector)
-            Note: Rotation vector is expressed with Rodrigues formula following OpenCV style
+            (True if pose was found; Pose containing position [xyz] and quaternion [wxyz] vector)
         """
         img = self.camera.get_color_frame()
-        _ret, _pose = self._find_pose(object_name)
+        found, pq = self._find_pose()
         if render:
-            if _ret:
-                r_vec, t_vec = _pose[0], _pose[1]
-                img = Drawing.frame_axes(self.camera, img, r_vec, t_vec, frame_length=0.01)
+            if found:
+                img = Drawing.frame_axes(self.camera, img, pq, frame_length=0.01)
             self.camera.render(img)
-        return _ret, _pose
+        return found, pq
 
     @abc.abstractmethod
-    def _find_pose(self, object_name: str) -> tuple[bool, npt.NDArray[np.float_]]:
+    def _find_pose(self) -> tuple[bool, PosOrinType]:
         """ Abstract class method to get the object pose estimate
 
-        Args:
-            object_name: Unique name of the searched object type
-
         Returns:
-            (True if pose was found; Pose as numpy array. Containing the rotation and translation vector)
-            Note: Rotation vector is expressed with Rodrigues formula following OpenCV style
+            (True if pose was found; Pose containing position [xyz] and quaternion [wxyz] vector)
         """
         raise NotImplementedError("Must be implemented in subclass")
