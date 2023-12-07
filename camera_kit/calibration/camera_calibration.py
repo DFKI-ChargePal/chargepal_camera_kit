@@ -13,7 +13,7 @@ from pathlib import Path
 
 # local
 from camera_kit.camera import CameraCoefficient
-import camera_kit.view.user_signals as user_signal
+import camera_kit.view.user as user_signal
 from camera_kit.camera.camera_base import CameraBase
 
 

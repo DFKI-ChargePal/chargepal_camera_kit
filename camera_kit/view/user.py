@@ -41,3 +41,7 @@ def pause() -> bool:
 @event
 def resume() -> bool:
     return EventObserver.state == EventObserver.Type.RESUME
+
+
+def wait_for_command() -> None:
+    EventObserver.wait_for_user()
