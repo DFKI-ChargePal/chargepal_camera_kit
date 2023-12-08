@@ -5,6 +5,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 # typing
+from typing import cast
 from numpy import typing as npt
 from camera_kit.core import PosOrinType
 
@@ -13,7 +14,7 @@ def pq_to_cv(pq: PosOrinType) -> tuple[npt.NDArray[np.float_], npt.NDArray[np.fl
     """ Convert a position quaternion vector in OpenCV convention
 
     Args:
-        pq: Tuple containing xyz and wxyz vector
+        pq: Tuple containing xyz and xyzw vector
 
     Returns:
         Rotation vector and translation vector as numpy arrays
@@ -31,8 +32,8 @@ def cv_to_pq(r_vec: npt.NDArray[np.float_], t_vec: npt.NDArray[np.float_]) -> Po
         t_vec: Translation vector
 
     Returns:
-        Position vector in xyz order and quaternion in wxyz order
+        Position vector in xyz order and quaternion in xyzw order
     """
-    p = tuple(np.reshape(t_vec, 3).tolist())
-    q = tuple(R.from_rotvec(np.reshape(r_vec, 3)).as_quat().tolist())
+    p = cast(tuple[float, float, float], tuple(np.reshape(t_vec, 3).tolist()))
+    q = cast(tuple[float, float, float, float], tuple(R.from_rotvec(np.reshape(r_vec, 3)).as_quat().tolist()))
     return p, q
