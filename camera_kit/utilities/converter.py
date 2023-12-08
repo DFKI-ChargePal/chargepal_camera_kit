@@ -5,7 +5,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 # typing
-from typing import cast
+from typing import cast, Tuple
 from numpy import typing as npt
 from camera_kit.core import PosOrinType
 
@@ -34,6 +34,6 @@ def cv_to_pq(r_vec: npt.NDArray[np.float_], t_vec: npt.NDArray[np.float_]) -> Po
     Returns:
         Position vector in xyz order and quaternion in xyzw order
     """
-    p = cast(tuple[float, float, float], tuple(np.reshape(t_vec, 3).tolist()))
-    q = cast(tuple[float, float, float, float], tuple(R.from_rotvec(np.reshape(r_vec, 3)).as_quat().tolist()))
+    p = cast(Tuple[float, float, float], tuple(np.reshape(t_vec, 3).tolist()))
+    q = cast(Tuple[float, float, float, float], tuple(R.from_rotvec(np.reshape(r_vec, 3)).as_quat().tolist()))
     return p, q
