@@ -63,7 +63,7 @@ class DetectorBase(metaclass=abc.ABCMeta):
             render:    If results should be shown on display or not
 
         Returns:
-            (True if pose was found; Pose containing position [xyz] and quaternion [wxyz] vector)
+            (True if pose was found; Pose containing position [xyz] and quaternion [xyzw] vector)
         """
         img = self.camera.get_color_frame()
         found, pq = self._find_pose()
@@ -78,6 +78,6 @@ class DetectorBase(metaclass=abc.ABCMeta):
         """ Abstract class method to get the object pose estimate
 
         Returns:
-            (True if pose was found; Pose containing position [xyz] and quaternion [wxyz] vector)
+            (True if pose was found; Pose containing position [xyz] and quaternion [xyzw] vector)
         """
         raise NotImplementedError("Must be implemented in subclass")
