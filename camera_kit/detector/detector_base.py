@@ -33,7 +33,7 @@ class DetectorBase(metaclass=abc.ABCMeta):
         # load configuration
         with self.config_fp.open("r") as filestream:
             try:
-                self.config: dict[str, Any] = yaml.safe_load(filestream)
+                self.config_dict: dict[str, Any] = yaml.safe_load(filestream)
             except Exception as e:
                 raise RuntimeError(f"Error while reading {self.config_fp.name} configuration. {e}")
 
