@@ -135,7 +135,7 @@ class CameraCalibration:
                 # ####### CALIBRATION ####### #
                 # ########################### #
                 rep_err, camera_mtx, dist_coeffs, r_vecs, t_vecs = cv.calibrateCamera(
-                    obj_points, img_points, camera._frame_size, None, None
+                    obj_points, img_points, camera.frame_size, None, None
                 )
 
                 LOGGER.debug('\nCalibration result:')
@@ -150,13 +150,15 @@ class CameraCalibration:
                     LOGGER.debug(t_v)
 
                 # Store camera coefficients
-                cc = CameraCoefficient(camera_mtx, dist_coeffs)
+                cc = CameraCoefficient(camera.name)
+                cc.intrinsic = camera_mtx
+                cc.distortion = dist_coeffs
                 LOGGER.info(f"Calibration successfully")
             else:
-                cc = CameraCoefficient()
+                cc = CameraCoefficient(camera.name)
                 LOGGER.warning(f"Could not find chessboard corners in the records. Calibration not successfully")
         else:
             LOGGER.warning(f"Not enough image records to run calibration")
-            cc = CameraCoefficient()
+            cc = CameraCoefficient(camera.name)
 
         return cc

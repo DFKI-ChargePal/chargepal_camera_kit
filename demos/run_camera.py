@@ -10,9 +10,9 @@ from argparse import Namespace
 def use_factory_function(opt: Namespace) -> None:
     # Set camera up
     ll = logging.DEBUG if opt.debug else logging.INFO
-    cam = ck.create(opt.camera_name, logger_level=ll)
+    cam = ck.camera_factory.create(opt.camera_name, logger_level=ll)
     # Loop camera stream
-    while not ck.user_signal.stop():
+    while not ck.user.stop():
         frame = cam.get_color_frame()
         frame = ck.Drawing.add_text(frame, f"hello {opt.camera_name}", (50, 50))
         cam.render(frame)

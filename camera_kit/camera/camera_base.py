@@ -1,15 +1,11 @@
 from __future__ import annotations
 # global
-import os
 import abc
 import copy
-import tomli
-import tomli_w
 import logging
 import cv2 as cv
 import numpy as np
 from pathlib import Path
-from tomlkit import document
 from threading import Thread
 # local
 from camera_kit.view.display import Display
@@ -58,11 +54,19 @@ class CameraBase(metaclass=abc.ABCMeta):
         self.color_frame = cv.cvtColor(np.zeros((3,) + self._frame_size, dtype=np.uint8).T, cv.COLOR_RGB2BGR)
         self.depth_frame = np.zeros((3,) + self._frame_size, dtype=np.uint8).T
         # Camera coefficients
-        self.cc = CameraCoefficient()
+        self.cc = CameraCoefficient(self._name)
         self.is_calibrated = False
         self.log_calib_msg = True
         if launch:
             self.start()
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def frame_size(self) -> tuple[int, int]:
+        return self._frame_size
 
     def _on_start(self) -> None:
         # Create thread
@@ -114,27 +118,11 @@ class CameraBase(metaclass=abc.ABCMeta):
         """ Class method to load camera coefficients
 
         Args:
-            file_path: File path to the directory where the intrinsic and distorted parameters files are saved
+            file_path: File path to the intrinsic and distorted parameters
 
-        Returns:
-            None
         """
-        if file_path:
-            fp = Path(file_path)
-            # Check if path exist
-            if not fp.is_file():
-                raise FileNotFoundError(f"File with given path '{str(fp)}' not found.")
-        else:
-            fp = self.coeffs_path
-            if not fp.is_file():
-                raise FileNotFoundError(f"File with default path '{str(fp)}' not found.")
-
-        with fp.open(mode='rb') as f:
-            coeffs = tomli.load(f)
-            self.cc.intrinsic = np.array(coeffs['intrinsic'], dtype=np.float64)
-            self.cc.distortion = np.array(coeffs['distortion'], dtype=np.float64)
+        self.cc.load(file_path)
         self.is_calibrated = True
-        LOGGER.debug(f"Load camera coefficients successfully.")
 
     def save_coefficients(self, cc: CameraCoefficient, dir_path: Path | str = "") -> None:
         """ Set camera coefficients and save them in the (optionally) given file_path
@@ -147,22 +135,7 @@ class CameraBase(metaclass=abc.ABCMeta):
         # Update camera coefficients
         self.cc = copy.copy(cc)
         self.is_calibrated = True
-        if dir_path:
-            dir_path = Path(dir_path)
-            if not dir_path.is_dir():
-                raise NotADirectoryError(f"Directory with given path '{dir_path}' not found.")
-            fp = Path(dir_path).joinpath('coefficients.toml')
-        else:
-            fp = self.coeffs_path
-        fp.parent.mkdir(parents=True, exist_ok=True)
-
-        toml = document()
-        toml.add("intrinsic", cc.intrinsic.tolist())
-        toml.add("distortion", cc.distortion.tolist())
-
-        with fp.open(mode='wb') as f:
-            tomli_w.dump(toml, f)
-        LOGGER.debug(f"Save new camera coefficients in folder {str(fp.parent)}")
+        self.cc.save(dir_path)
 
     @abc.abstractmethod
     def start(self) -> None:
