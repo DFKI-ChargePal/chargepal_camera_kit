@@ -10,10 +10,10 @@ from camera_kit.camera.camera_realsense import CameraRealSense
 from camera_kit.camera.camera_factory import CameraFactory
 
 # typing
-from typing import Any, Iterator, Tuple, Type
+from typing import Any, Iterator, Tuple
 
 
-PosOrinType = Tuple[Tuple[float, float, float], Tuple[float, float, float, float]]
+PosOrinType = Tuple[Tuple[float, float, float], Tuple[float, float, float, float]]  # Order: (x, y, z), (x, y, z, w)
 
 
 camera_factory = CameraFactory()
