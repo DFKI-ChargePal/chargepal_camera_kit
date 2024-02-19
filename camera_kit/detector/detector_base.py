@@ -4,8 +4,8 @@ from __future__ import annotations
 import abc
 import yaml
 import logging
-from pathlib import Path
 import spatialmath as sm
+from pathlib import Path
 
 # local
 from camera_kit.view.drawing import Drawing
@@ -79,6 +79,6 @@ class DetectorBase(metaclass=abc.ABCMeta):
         """ Abstract class method to get the object pose estimate
 
         Returns:
-            (True if pose was found; Pose containing position [xyz] and quaternion [xyzw] vector)
+            (True if pose was found; Pose as SE(3) transformation matrix)
         """
         raise NotImplementedError("Must be implemented in subclass")
