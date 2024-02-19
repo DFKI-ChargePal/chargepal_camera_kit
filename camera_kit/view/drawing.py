@@ -2,14 +2,14 @@ from __future__ import annotations
 # global
 import cv2 as cv
 import numpy as np
+import spatialmath as sm
 
 # local
 from camera_kit.camera.camera_base import CameraBase
-from camera_kit.utilities.converter import pq_to_cv
+from camera_kit.utilities.converter import se3_to_cv
 
 # typing
 from numpy import typing as npt
-from camera_kit.core import PosOrinType
 
 
 class Drawing:
@@ -142,7 +142,7 @@ class Drawing:
     @staticmethod
     def frame_axes(cam: CameraBase,
                    img: npt.NDArray[np.uint8],
-                   pq: PosOrinType,
+                   mat: sm.SE3,
                    frame_length: float,
                    ) -> npt.NDArray[np.uint8]:
         """ Draw coordinate axes on the image.
@@ -150,13 +150,13 @@ class Drawing:
         Args:
             cam:          The camera object
             img:          The source image where to draw the axes
-            pq:           Position and orientation of the frame
+            mat:          Pose of the frame
             frame_length: Length of the axes [m]
 
         Returns:
             The manipulated image
         """
-        r_vec, t_vec = pq_to_cv(pq)
+        r_vec, t_vec = se3_to_cv(mat)
         cv.drawFrameAxes(img,
                          cam.cc.intrinsic,
                          cam.cc.distortion,

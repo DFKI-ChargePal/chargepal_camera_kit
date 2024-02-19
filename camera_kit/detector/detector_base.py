@@ -5,6 +5,7 @@ import abc
 import yaml
 import logging
 from pathlib import Path
+import spatialmath as sm
 
 # local
 from camera_kit.view.drawing import Drawing
@@ -56,25 +57,25 @@ class DetectorBase(metaclass=abc.ABCMeta):
         if not self._camera.is_calibrated:
             self._camera.load_coefficients()
 
-    def find_pose(self, render: bool = False) -> tuple[bool, PosOrinType]:
+    def find_pose(self, render: bool = False) -> tuple[bool, sm.SE3]:
         """ Method to find object pose estimate
 
         Args:
             render:    If results should be shown on display or not
 
         Returns:
-            (True if pose was found; Pose containing position [xyz] and quaternion [xyzw] vector)
+            (True if pose was found; Pose as SE(3) transformation matrix)
         """
         img = self.camera.get_color_frame()
-        found, pq = self._find_pose()
+        found, se3_mat = self._find_pose()
         if render:
             if found:
-                img = Drawing.frame_axes(self.camera, img, pq, frame_length=0.01)
+                img = Drawing.frame_axes(self.camera, img, se3_mat, frame_length=0.01)
             self.camera.render(img)
-        return found, pq
+        return found, se3_mat
 
     @abc.abstractmethod
-    def _find_pose(self) -> tuple[bool, PosOrinType]:
+    def _find_pose(self) -> tuple[bool, sm.SE3]:
         """ Abstract class method to get the object pose estimate
 
         Returns:
