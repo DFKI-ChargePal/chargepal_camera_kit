@@ -157,6 +157,8 @@ class Drawing:
             The manipulated image
         """
         r_vec, t_vec = se3_to_cv(mat)
+        t_vec = t_vec.astype(np.float32)
+        r_vec = r_vec.astype(np.float32)
         cv.drawFrameAxes(img,
                          cam.cc.intrinsic,
                          cam.cc.distortion,
