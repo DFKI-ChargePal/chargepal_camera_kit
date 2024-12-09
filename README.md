@@ -6,11 +6,11 @@ A tool kit to work and interface to serial cameras
 
 1) Clone the repository 
 ```shell
-git clone git@git.ni.dfki.de:gjohn/ssl_dataset.git
+git clone git@github.com:DFKI-ChargePal/chargepal_camera_kit.git
 ```
 2) Navigate to the repository directory
 ```shell
-cd ssl_dataset
+cd chargepal_camera_kit
  ```
 3) Initialize [poetry](https://python-poetry.org/)
 ```shell
